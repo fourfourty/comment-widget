@@ -1,7 +1,8 @@
 import * as React from 'react';
 import is_Empty from './check-empty';
-import Comm from './comm-item';
+import CommentItem from './comm-item';
 import Comm_date from './comm-date';
+const COMMENT_REPO_NAME = 'comments';
 
 export class Widget extends React.Component {
   constructor (props) {
@@ -14,54 +15,41 @@ export class Widget extends React.Component {
     }
     const CheckLocalStor = () => {
       for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const value = localStorage.getItem(key);
-        this.state.comments.push(JSON.parse(value));
+        const commentsArr = localStorage.getItem(COMMENT_REPO_NAME);
+        const parsedCommensArr = JSON.parse(commentsArr);
+        parsedCommensArr.forEach(comm => this.state.comments.push(comm))
       }
     }
     CheckLocalStor();
   }
   add() {
-    localStorage.setItem(
-    `${'comment_'}${Math.random()*10}`, JSON.stringify({
-      'text': this.state.newComment,
-      'author': this.state.newAuthor,
-      'date': this.state.newDate,
-    }));
-
     const comments = this.state.comments;
     comments.push({
       text: this.state.newComment,
       author: this.state.newAuthor,
       date: this.state.newDate,
-    })
+    });
+    const sortArr = comments.filter(obj => !is_Empty(obj) ? obj : false);
+    localStorage.setItem(COMMENT_REPO_NAME, JSON.stringify(sortArr));
     this.setState({ 
       comments,
       newComment:'',
       newAuthor:'', 
-    });
+    })
   }
-  remove(current_key) {
-    const keyArr = [];
+  remove(target) {
     const confirmDelete = confirm('Удалить');
     if (!confirmDelete) {
       return false;
     }
-
-    for (let i = 0; i < localStorage.length; i++) {
-      keyArr.push(localStorage.key(i))
-    }
-    for (let j = 0; j < keyArr.length;j++) {
-      if (j === current_key) {
-        console.log(keyArr[j]);
-        localStorage.removeItem(keyArr[j]);
-      }
-    }
-
-    const comments = this.state.comments.map((comm,index) => {
-      if (current_key === index) {
-        return {
+    const comments = this.state.comments.filter((comm) => is_Empty(comm) ? false : comm).map((comm,index) => {
+      if (target === index) {
+        for (let i = 0; i < localStorage.length; i++) {
+          const storage = JSON.parse(localStorage.getItem(COMMENT_REPO_NAME));
+          storage.splice(target,1);
+          localStorage.setItem(COMMENT_REPO_NAME, JSON.stringify(storage));
         }
+        return {};
       }
       else return comm;
     })
@@ -73,13 +61,11 @@ export class Widget extends React.Component {
         <div className='left'>
           <h2>Comments widget</h2>
           <ul>
-            {
-              this.state.comments.map((comm,index) => {
-                if(is_Empty(comm)) {
-                  return false;
-                }
+            { 
+              this.state.comments.filter((comm) => is_Empty(comm) ? false : comm).map(
+                (comm,index) => {
                 return (
-                  <Comm 
+                  <CommentItem 
                   key={index}
                   text={comm.text}
                   author={comm.author}
@@ -93,7 +79,7 @@ export class Widget extends React.Component {
         </div>
         <div className='right'>
         <form onSubmit={(e) => {
-        e.preventDefault();
+          e.preventDefault();
         this.add();
         }}>
           <h3>Введите комментарий</h3>
