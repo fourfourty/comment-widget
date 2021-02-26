@@ -49,15 +49,19 @@ export class Widget extends React.Component {
     }
 
     for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      keyArr.push(key);
-      for (let j = 0; j <keyArr.length; j++) {
+      keyArr.push(localStorage.key(i))
+    }
+    for (let j = 0; j < keyArr.length;j++) {
+      if (j === current_key) {
+        console.log(keyArr[j]);
         localStorage.removeItem(keyArr[j]);
       }
     }
+
     const comments = this.state.comments.map((comm,index) => {
       if (current_key === index) {
-        return {}
+        return {
+        }
       }
       else return comm;
     })
