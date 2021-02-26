@@ -1,7 +1,7 @@
 {
-  "name": "My",
+  "name": "Comment-widget",
   "version": "1.0.0",
-  "description": "react app",
+  "description": "comment-widget made using react",
   "main": "index.js",
   "scripts": {
     "build:dev": "SET env NODE_ENV=development & webpack --config webpack.config.js",
